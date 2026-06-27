@@ -5,13 +5,49 @@ const heroImageTwo = new URL('../ChatGPT Image Jun 25, 2026, 12_10_07 PM.png', i
 const heroImageThree = new URL('../ChatGPT Image Jun 25, 2026, 12_10_33 PM.png', import.meta.url).href;
 
 const teachItems = [
-  { id: 'html', icon: 'H', label: 'HTML', description: 'Learn modern HTML structure, semantic markup, and page layout fundamentals.' },
-  { id: 'css', icon: 'C', label: 'CSS', description: 'Master responsive design, animations, and styling for polished interfaces.' },
-  { id: 'javascript', icon: 'JS', label: 'JavaScript', description: 'Build dynamic behavior, interactivity, and client-side application logic.' },
-  { id: 'python', icon: 'Py', label: 'Python', tag: 'Data Science / MySQL', description: 'Explore Python for data science, automation, and backend integration.' },
-  { id: 'mysql', icon: 'DB', label: 'MySQL', description: 'Work with relational data, queries, and real-world database workflows.' },
-  { id: 'react', icon: 'R', label: 'React', description: 'Create component-driven web apps with modern UI patterns and hooks.' },
-  { id: 'data-science', icon: 'DS', label: 'Data Science', description: 'Analyze data, visualize insights, and apply machine learning ideas.' }
+  {
+    id: 'html',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
+    label: 'HTML',
+    description: 'Learn modern HTML structure, semantic markup, and page layout fundamentals.'
+  },
+  {
+    id: 'css',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg',
+    label: 'CSS',
+    description: 'Master responsive design, animations, and styling for polished interfaces.'
+  },
+  {
+    id: 'javascript',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+    label: 'JavaScript',
+    description: 'Build dynamic behavior, interactivity, and client-side application logic.'
+  },
+  {
+    id: 'python',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+    label: 'Python',
+    tag: 'Data Science / MySQL',
+    description: 'Explore Python for data science, automation, and backend integration.'
+  },
+  {
+    id: 'mysql',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
+    label: 'MySQL',
+    description: 'Work with relational data, queries, and real-world database workflows.'
+  },
+  {
+    id: 'react',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+    label: 'React',
+    description: 'Create component-driven web apps with modern UI patterns and hooks.'
+  },
+  {
+    id: 'data-science',
+    icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg',
+    label: 'Data Science',
+    description: 'Analyze data, visualize insights, and apply machine learning ideas.'
+  }
 ];
 
 const projects = [
@@ -258,7 +294,9 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
                 onClick={() => setSelectedPill(key)}
                 onKeyDown={(event) => handleKeyDown(event, key)}
               >
-                <span className="pill__icon">{item.icon}</span>
+                <span className="pill__icon">
+                  <img src={item.icon} alt="" aria-hidden="true" />
+                </span>
                 <span className="pill__label">{item.label}</span>
                 {item.tag && <span className="pill__tag">{item.tag}</span>}
               </div>
@@ -343,7 +381,9 @@ function TeachDetailsPanel({ selectedItem, clearSelection, externalClosing }) {
     >
       <div className="teach-detail-panel__header">
         <div className="teach-detail-panel__pill">
-          <span className="pill__icon">{selectedItem.icon}</span>
+          <span className="pill__icon">
+            <img src={selectedItem.icon} alt="" aria-hidden="true" />
+          </span>
         </div>
         <div>
           <p className="teach-detail-panel__label">{selectedItem.label}</p>

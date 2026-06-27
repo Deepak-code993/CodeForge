@@ -967,6 +967,7 @@ section:not(.hero) {
 .teach-carousel {
   margin-top: 20px;
   overflow: hidden;
+  padding-block: 18px;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
 }
@@ -979,7 +980,7 @@ section:not(.hero) {
   gap: 16px;
   width: max-content;
   margin: 0;
-  padding: 16px 0;
+  padding: 26px 0;
   animation: teach-strip-scroll var(--teach-scroll-duration) linear infinite;
   will-change: transform;
 }
@@ -1004,8 +1005,8 @@ section:not(.hero) {
 
 .pill {
   flex: 0 0 auto;
-  min-width: 140px;
-  min-height: 132px;
+  min-width: 200px;
+  min-height: 192px;
   padding: 20px 16px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
@@ -1168,11 +1169,14 @@ section:not(.hero) {
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: var(--orange-light);
-  color: var(--orange-deep);
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  font-weight: 800;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(45, 55, 72, 0.08);
+}
+
+.pill__icon img {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
 }
 
 .pill__label {
