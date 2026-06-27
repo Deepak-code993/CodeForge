@@ -949,7 +949,7 @@ section:not(.hero) {
   letter-spacing: -0.015em;
 }
 
-.section-sub {h
+.section-sub {
   max-width: 600px;
   margin-top: 12px;
   color: var(--body-text);
