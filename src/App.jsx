@@ -20,7 +20,8 @@ const teachItems = [
     accent: '#e44d26',
     soft: '#fff0eb',
     glow: 'rgba(228, 77, 38, 0.28)',
-    description: 'Learn modern HTML structure, semantic markup, and page layout fundamentals.'
+    description: 'Learn modern HTML structure, semantic markup, and page layout fundamentals.',
+    concepts: ['Semantic tags', 'Forms', 'Tables', 'SEO basics']
   },
   {
     id: 'css',
@@ -30,7 +31,8 @@ const teachItems = [
     accent: '#1572b6',
     soft: '#eaf5ff',
     glow: 'rgba(21, 114, 182, 0.26)',
-    description: 'Master responsive design, animations, and styling for polished interfaces.'
+    description: 'Master responsive design, animations, and styling for polished interfaces.',
+    concepts: ['Flexbox', 'Grid', 'Responsive UI', 'Animations']
   },
   {
     id: 'javascript',
@@ -40,7 +42,8 @@ const teachItems = [
     accent: '#d6a800',
     soft: '#fff8d9',
     glow: 'rgba(214, 168, 0, 0.28)',
-    description: 'Build dynamic behavior, interactivity, and client-side application logic.'
+    description: 'Build dynamic behavior, interactivity, and client-side application logic.',
+    concepts: ['Variables', 'Functions', 'DOM events', 'Async API calls']
   },
   {
     id: 'python',
@@ -50,7 +53,8 @@ const teachItems = [
     accent: '#3776ab',
     soft: '#edf6ff',
     glow: 'rgba(55, 118, 171, 0.26)',
-    description: 'Explore Python for data science, automation, and backend integration.'
+    description: 'Explore Python for data science, automation, and backend integration.',
+    concepts: ['Loops', 'Functions', 'File handling', 'Data analysis']
   },
   {
     id: 'mysql',
@@ -60,7 +64,8 @@ const teachItems = [
     accent: '#00618a',
     soft: '#e8f7fb',
     glow: 'rgba(0, 97, 138, 0.26)',
-    description: 'Work with relational data, queries, and real-world database workflows.'
+    description: 'Work with relational data, queries, and real-world database workflows.',
+    concepts: ['Tables', 'SELECT queries', 'Joins', 'CRUD']
   },
   {
     id: 'react',
@@ -70,7 +75,8 @@ const teachItems = [
     accent: '#149eca',
     soft: '#eafaff',
     glow: 'rgba(20, 158, 202, 0.28)',
-    description: 'Create component-driven web apps with modern UI patterns and hooks.'
+    description: 'Create component-driven web apps with modern UI patterns and hooks.',
+    concepts: ['Components', 'Props', 'State', 'Hooks']
   },
   {
     id: 'data-science',
@@ -80,7 +86,8 @@ const teachItems = [
     accent: '#654ff0',
     soft: '#f1efff',
     glow: 'rgba(101, 79, 240, 0.28)',
-    description: 'Analyze data, visualize insights, and apply machine learning ideas.'
+    description: 'Analyze data, visualize insights, and apply machine learning ideas.',
+    concepts: ['Pandas', 'Charts', 'Cleaning data', 'ML basics']
   }
 ];
 
@@ -415,7 +422,43 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
           </div>
         </div>
       </div>
+      <ConceptCards items={renderedItems} />
     </section>
+  );
+}
+
+function ConceptCards({ items }) {
+  const movingItems = [...items, ...items];
+
+  return (
+    <div className="concept-marquee" aria-label="Programming concepts">
+      <div className="concept-marquee__track">
+        {movingItems.map((item, index) => (
+          <article
+            key={`${item.id}-${index}`}
+            className="concept-card"
+            style={{
+              '--pill-accent': item.accent,
+              '--pill-soft': item.soft,
+              '--pill-glow': item.glow
+            }}
+            aria-hidden={index >= items.length}
+          >
+            <div className="concept-card__head">
+              <span className="concept-card__icon">
+                <img src={item.icon} alt="" aria-hidden="true" />
+              </span>
+              <h3>{item.label}</h3>
+            </div>
+            <ul>
+              {item.concepts.map((concept) => (
+                <li key={concept}>{concept}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </div>
   );
 }
 
