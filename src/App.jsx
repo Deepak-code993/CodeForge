@@ -4,23 +4,42 @@ const heroImageOne = new URL('../ChatGPT Image Jun 25, 2026, 12_09_59 PM.png', i
 const heroImageTwo = new URL('../ChatGPT Image Jun 25, 2026, 12_10_07 PM.png', import.meta.url).href;
 const heroImageThree = new URL('../ChatGPT Image Jun 25, 2026, 12_10_33 PM.png', import.meta.url).href;
 
+const teachCarouselSettings = {
+  speed: '18s',
+  wheelBoostSpeed: '7s',
+  cardWidth: '200px',
+  cardHeight: '192px'
+};
+
 const teachItems = [
   {
     id: 'html',
     icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
     label: 'HTML',
+    tag: 'Markup',
+    accent: '#e44d26',
+    soft: '#fff0eb',
+    glow: 'rgba(228, 77, 38, 0.28)',
     description: 'Learn modern HTML structure, semantic markup, and page layout fundamentals.'
   },
   {
     id: 'css',
     icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg',
     label: 'CSS',
+    tag: 'Design',
+    accent: '#1572b6',
+    soft: '#eaf5ff',
+    glow: 'rgba(21, 114, 182, 0.26)',
     description: 'Master responsive design, animations, and styling for polished interfaces.'
   },
   {
     id: 'javascript',
     icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
     label: 'JavaScript',
+    tag: 'Logic',
+    accent: '#d6a800',
+    soft: '#fff8d9',
+    glow: 'rgba(214, 168, 0, 0.28)',
     description: 'Build dynamic behavior, interactivity, and client-side application logic.'
   },
   {
@@ -28,24 +47,39 @@ const teachItems = [
     icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
     label: 'Python',
     tag: 'Data Science / MySQL',
+    accent: '#3776ab',
+    soft: '#edf6ff',
+    glow: 'rgba(55, 118, 171, 0.26)',
     description: 'Explore Python for data science, automation, and backend integration.'
   },
   {
     id: 'mysql',
     icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
     label: 'MySQL',
+    tag: 'Database',
+    accent: '#00618a',
+    soft: '#e8f7fb',
+    glow: 'rgba(0, 97, 138, 0.26)',
     description: 'Work with relational data, queries, and real-world database workflows.'
   },
   {
     id: 'react',
     icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
     label: 'React',
+    tag: 'Frontend',
+    accent: '#149eca',
+    soft: '#eafaff',
+    glow: 'rgba(20, 158, 202, 0.28)',
     description: 'Create component-driven web apps with modern UI patterns and hooks.'
   },
   {
     id: 'data-science',
     icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg',
     label: 'Data Science',
+    tag: 'Analytics',
+    accent: '#654ff0',
+    soft: '#f1efff',
+    glow: 'rgba(101, 79, 240, 0.28)',
     description: 'Analyze data, visualize insights, and apply machine learning ideas.'
   }
 ];
@@ -109,9 +143,6 @@ function App() {
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  // enable faster wheel scrolling over the teach track
-  useTeachWheel(trackRef);
 
   // close the panel when clicking anywhere outside the panel or pills
   // request the closing animation rather than instantly clearing selection
@@ -261,7 +292,8 @@ function Hero({ onEnroll }) {
 }
 
 function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }) {
-  const renderedItems = [...teachItems, ...teachItems];
+  const renderedItems = teachItems;
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const handleKeyDown = (event, key) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -269,36 +301,68 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
     setSelectedPill(key);
   };
 
+  useTeachWheel(trackRef, setActiveIndex, renderedItems.length);
+
   return (
     <section id="teach" className="teach">
       <h2 className="section-title">We Will Teach</h2>
       <p className="section-sub">Pick a track. Every track ends in a real project, not just a quiz.</p>
-      <div className="teach-carousel" aria-label="Subjects we teach">
+      <div
+        className="teach-carousel"
+        aria-label="Subjects we teach"
+        style={{
+          '--teach-scroll-duration': teachCarouselSettings.speed,
+          '--teach-wheel-duration': teachCarouselSettings.wheelBoostSpeed,
+          '--pill-width': teachCarouselSettings.cardWidth,
+          '--pill-height': teachCarouselSettings.cardHeight
+        }}
+      >
         <div ref={trackRef} className={`teach-carousel__track ${selectedPill ? 'is-paused' : ''}`}>
           {renderedItems.map((item, index) => {
-            const copy = index < teachItems.length ? 0 : 1;
-            const key = `${copy}-${item.id}`;
+            const key = `0-${item.id}`;
             const selected = selectedPill === key;
+            const offset = getLoopOffset(index, activeIndex, renderedItems.length);
+            const positionClass = offset === 0
+              ? 'is-active'
+              : offset === -1
+                ? 'is-prev'
+                : offset === 1
+                  ? 'is-next'
+                  : offset < -1
+                    ? 'is-before-hidden'
+                    : 'is-after-hidden';
+            const isVisible = Math.abs(offset) <= 1;
 
             return (
               <div
                 key={key}
                 ref={(node) => {
-                  if (copy === 0) firstSetRefs.current[index] = node;
+                  firstSetRefs.current[index] = node;
                 }}
-                className={`pill ${selected ? 'is-selected' : ''}`}
+                className={`pill ${positionClass} ${selected ? 'is-selected' : ''}`}
                 role="button"
-                tabIndex={copy === 0 ? 0 : -1}
-                aria-hidden={copy === 1 ? 'true' : undefined}
-                aria-pressed={copy === 0 ? selected : undefined}
+                tabIndex={isVisible ? 0 : -1}
+                aria-pressed={selected}
+                aria-hidden={!isVisible}
+                style={{
+                  '--card-index': index,
+                  '--card-count': renderedItems.length,
+                  '--card-offset': offset,
+                  '--pill-accent': item.accent,
+                  '--pill-soft': item.soft,
+                  '--pill-glow': item.glow
+                }}
                 onClick={() => setSelectedPill(key)}
                 onKeyDown={(event) => handleKeyDown(event, key)}
               >
+                <span className="pill__shine" aria-hidden="true"></span>
                 <span className="pill__icon">
                   <img src={item.icon} alt="" aria-hidden="true" />
                 </span>
-                <span className="pill__label">{item.label}</span>
-                {item.tag && <span className="pill__tag">{item.tag}</span>}
+                <span className="pill__content">
+                  <span className="pill__label">{item.label}</span>
+                  {item.tag && <span className="pill__tag">{item.tag}</span>}
+                </span>
               </div>
             );
           })}
@@ -308,45 +372,50 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
   );
 }
 
-// make wheel scrolling over the track push the strip forward faster
-function useTeachWheel(trackRef) {
+function getLoopOffset(index, activeIndex, total) {
+  const half = Math.floor(total / 2);
+  let offset = index - activeIndex;
+
+  if (offset > half) offset -= total;
+  if (offset < -half) offset += total;
+
+  return offset;
+}
+
+// Wheel scrolling over the strip advances the carousel; otherwise it stays static.
+function useTeachWheel(trackRef, setActiveIndex, totalItems) {
   useEffect(() => {
     const el = trackRef.current;
-    if (!el) return;
+    if (!el || totalItems < 2) return;
 
-    let boostTimer = null;
+    let wheelRemainder = 0;
+    let wheelLock = false;
 
     const onWheel = (e) => {
       e.preventDefault();
 
-      const primaryDelta = Math.abs(e.deltaY || e.deltaX);
+      const primaryDelta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
       const modeMultiplier = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
-      const nudgeMs = Math.min(1800, Math.max(180, primaryDelta * modeMultiplier * 2));
+      wheelRemainder += primaryDelta * modeMultiplier;
 
-      el.classList.add('is-wheel-boosting');
+      if (wheelLock || Math.abs(wheelRemainder) < 80) return;
 
-      try {
-        el.getAnimations().forEach((animation) => {
-          if (typeof animation.currentTime === 'number') {
-            animation.currentTime += nudgeMs;
-          }
-        });
-      } catch (err) {
-        // The normal CSS animation still runs if the animation API is unavailable.
-      }
+      const direction = wheelRemainder > 0 ? 1 : -1;
+      wheelRemainder = 0;
+      wheelLock = true;
 
-      clearTimeout(boostTimer);
-      boostTimer = setTimeout(() => {
-        el.classList.remove('is-wheel-boosting');
-      }, 600);
+      setActiveIndex((current) => (current + direction + totalItems) % totalItems);
+
+      window.setTimeout(() => {
+        wheelLock = false;
+      }, 260);
     };
 
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => {
       el.removeEventListener('wheel', onWheel);
-      clearTimeout(boostTimer);
     };
-  }, [trackRef]);
+  }, [trackRef, setActiveIndex, totalItems]);
 }
 
 function TeachDetailsPanel({ selectedItem, clearSelection, externalClosing }) {
@@ -368,6 +437,9 @@ function TeachDetailsPanel({ selectedItem, clearSelection, externalClosing }) {
       className={`teach-detail-panel ${(isClosing || externalClosing) ? 'closing' : ''}`}
       aria-live="polite"
       style={{
+        '--pill-accent': selectedItem.accent,
+        '--pill-soft': selectedItem.soft,
+        '--pill-glow': selectedItem.glow,
         position: 'fixed',
         top: 0,
         left: 0,
