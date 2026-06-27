@@ -151,7 +151,14 @@ function App() {
       const target = e.target;
       if (!target) return;
       // if clicking inside the detail panel or on a pill, do nothing
-      if (target.closest && (target.closest('.teach-detail-panel') || target.closest('.pill'))) return;
+      if (
+        target.closest
+        && (
+          target.closest('.teach-detail-panel')
+          || target.closest('.pill')
+          || target.closest('.teach-carousel__hit')
+        )
+      ) return;
       // if a panel is open, request the closing animation
       if (selectedPill) {
         setPanelClosing(true);
@@ -302,6 +309,16 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
   };
 
   useTeachWheel(trackRef, setActiveIndex, renderedItems.length);
+  const visibleItems = [-2, -1, 0, 1, 2].map((offset) => {
+    const itemIndex = (activeIndex + offset + renderedItems.length) % renderedItems.length;
+    const item = renderedItems[itemIndex];
+
+    return {
+      item,
+      offset,
+      key: `0-${item.id}`
+    };
+  });
 
   return (
     <section id="teach" className="teach">
@@ -328,10 +345,14 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
                 ? 'is-prev'
                 : offset === 1
                   ? 'is-next'
+                  : offset === -2
+                    ? 'is-prev-outer'
+                    : offset === 2
+                      ? 'is-next-outer'
                   : offset < -1
                     ? 'is-before-hidden'
                     : 'is-after-hidden';
-            const isVisible = Math.abs(offset) <= 1;
+            const isVisible = Math.abs(offset) <= 2;
 
             return (
               <div
@@ -340,10 +361,16 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
                   firstSetRefs.current[index] = node;
                 }}
                 className={`pill ${positionClass} ${selected ? 'is-selected' : ''}`}
-                role="button"
+                role={isVisible ? 'button' : 'presentation'}
                 tabIndex={isVisible ? 0 : -1}
-                aria-pressed={selected}
                 aria-hidden={!isVisible}
+                aria-label={isVisible ? `Open ${item.label}` : undefined}
+                onClick={() => {
+                  if (isVisible) setSelectedPill(key);
+                }}
+                onKeyDown={(event) => {
+                  if (isVisible) handleKeyDown(event, key);
+                }}
                 style={{
                   '--card-index': index,
                   '--card-count': renderedItems.length,
@@ -352,8 +379,6 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
                   '--pill-soft': item.soft,
                   '--pill-glow': item.glow
                 }}
-                onClick={() => setSelectedPill(key)}
-                onKeyDown={(event) => handleKeyDown(event, key)}
               >
                 <span className="pill__shine" aria-hidden="true"></span>
                 <span className="pill__icon">
@@ -366,6 +391,28 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
               </div>
             );
           })}
+          <div className="teach-carousel__hits" aria-hidden="false">
+            {visibleItems.map(({ item, offset, key }) => (
+              <button
+                key={`hit-${key}-${offset}`}
+                type="button"
+                className={`teach-carousel__hit teach-carousel__hit--${
+                  offset === 0
+                    ? 'center'
+                    : offset === -1
+                      ? 'left'
+                      : offset === 1
+                        ? 'right'
+                        : offset === -2
+                          ? 'left-outer'
+                          : 'right-outer'
+                }`}
+                aria-label={`Open ${item.label}`}
+                onClick={() => setSelectedPill(key)}
+                onKeyDown={(event) => handleKeyDown(event, key)}
+              ></button>
+            ))}
+          </div>
         </div>
       </div>
     </section>
