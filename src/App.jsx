@@ -21,7 +21,7 @@ const teachItems = [
     soft: '#fff0eb',
     glow: 'rgba(228, 77, 38, 0.28)',
     description: 'Learn modern HTML structure, semantic markup, and page layout fundamentals.',
-    concepts: ['Semantic tags', 'Forms', 'Tables', 'SEO basics']
+    concepts: ['Semantic tags', 'Forms', 'Tables', 'Media tags', 'Accessibility', 'SEO basics']
   },
   {
     id: 'css',
@@ -32,7 +32,7 @@ const teachItems = [
     soft: '#eaf5ff',
     glow: 'rgba(21, 114, 182, 0.26)',
     description: 'Master responsive design, animations, and styling for polished interfaces.',
-    concepts: ['Flexbox', 'Grid', 'Responsive UI', 'Animations']
+    concepts: ['Selectors', 'Flexbox', 'Grid', 'Responsive UI', 'Transitions', 'Animations']
   },
   {
     id: 'javascript',
@@ -43,7 +43,7 @@ const teachItems = [
     soft: '#fff8d9',
     glow: 'rgba(214, 168, 0, 0.28)',
     description: 'Build dynamic behavior, interactivity, and client-side application logic.',
-    concepts: ['Variables', 'Functions', 'DOM events', 'Async API calls']
+    concepts: ['Variables', 'Functions', 'Arrays', 'DOM events', 'Async API calls', 'Error handling']
   },
   {
     id: 'python',
@@ -54,7 +54,7 @@ const teachItems = [
     soft: '#edf6ff',
     glow: 'rgba(55, 118, 171, 0.26)',
     description: 'Explore Python for data science, automation, and backend integration.',
-    concepts: ['Loops', 'Functions', 'File handling', 'Data analysis']
+    concepts: ['Loops', 'Functions', 'OOP basics', 'File handling', 'APIs', 'Data analysis']
   },
   {
     id: 'mysql',
@@ -65,7 +65,7 @@ const teachItems = [
     soft: '#e8f7fb',
     glow: 'rgba(0, 97, 138, 0.26)',
     description: 'Work with relational data, queries, and real-world database workflows.',
-    concepts: ['Tables', 'SELECT queries', 'Joins', 'CRUD']
+    concepts: ['Tables', 'SELECT queries', 'Joins', 'CRUD', 'Indexes', 'Relationships']
   },
   {
     id: 'react',
@@ -76,7 +76,7 @@ const teachItems = [
     soft: '#eafaff',
     glow: 'rgba(20, 158, 202, 0.28)',
     description: 'Create component-driven web apps with modern UI patterns and hooks.',
-    concepts: ['Components', 'Props', 'State', 'Hooks']
+    concepts: ['Components', 'Props', 'State', 'Hooks', 'Forms', 'API data']
   },
   {
     id: 'data-science',
@@ -87,7 +87,7 @@ const teachItems = [
     soft: '#f1efff',
     glow: 'rgba(101, 79, 240, 0.28)',
     description: 'Analyze data, visualize insights, and apply machine learning ideas.',
-    concepts: ['Pandas', 'Charts', 'Cleaning data', 'ML basics']
+    concepts: ['Pandas', 'NumPy', 'Charts', 'Cleaning data', 'EDA', 'ML basics']
   }
 ];
 
@@ -422,42 +422,43 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
           </div>
         </div>
       </div>
-      <ConceptCards items={renderedItems} />
+      {!selectedPill && <ConceptCard item={renderedItems[activeIndex]} />}
     </section>
   );
 }
 
-function ConceptCards({ items }) {
-  const movingItems = [...items, ...items];
-
+function ConceptCard({ item }) {
   return (
-    <div className="concept-marquee" aria-label="Programming concepts">
-      <div className="concept-marquee__track">
-        {movingItems.map((item, index) => (
-          <article
-            key={`${item.id}-${index}`}
-            className="concept-card"
-            style={{
-              '--pill-accent': item.accent,
-              '--pill-soft': item.soft,
-              '--pill-glow': item.glow
-            }}
-            aria-hidden={index >= items.length}
-          >
-            <div className="concept-card__head">
-              <span className="concept-card__icon">
-                <img src={item.icon} alt="" aria-hidden="true" />
-              </span>
+    <div className="concept-stage" aria-live="polite">
+      <article
+        key={item.id}
+        className="concept-card"
+        style={{
+          '--pill-accent': item.accent,
+          '--pill-soft': item.soft,
+          '--pill-glow': item.glow
+        }}
+      >
+        <span className="concept-card__plane concept-card__plane--back" aria-hidden="true"></span>
+        <span className="concept-card__plane concept-card__plane--mid" aria-hidden="true"></span>
+        <div className="concept-card__face">
+          <div className="concept-card__head">
+            <span className="concept-card__icon">
+              <img src={item.icon} alt="" aria-hidden="true" />
+            </span>
+            <div>
+              <span className="concept-card__tag">{item.tag}</span>
               <h3>{item.label}</h3>
             </div>
-            <ul>
-              {item.concepts.map((concept) => (
-                <li key={concept}>{concept}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </div>
+          </div>
+          <p className="concept-card__summary">{item.description}</p>
+          <div className="concept-card__chips">
+            {item.concepts.map((concept) => (
+              <span key={concept}>{concept}</span>
+            ))}
+          </div>
+        </div>
+      </article>
     </div>
   );
 }
