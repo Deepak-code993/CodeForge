@@ -29,81 +29,87 @@ function App() {
   const trackRef = useRef(null);
   const firstSetRefs = useRef([]);
 
-  useEffect(() => {
-    const updateDistance = () => {
-      if (!trackRef.current) return;
+  // derive selected item from key like "0-html" or "1-data-science"
+  const selectedItem = selectedPill
+    ? teachItems.find((it) => it.id === selectedPill.split('-').slice(1).join('-'))
+    : null;
 
-      const gap = parseFloat(getComputedStyle(trackRef.current).gap || '16') || 16;
-      const distance = firstSetRefs.current.reduce((total, pill) => {
-        return total + (pill?.getBoundingClientRect().width || 0);
-      }, 0) + gap * teachItems.length;
+  const clearSelection = () => setSelectedPill(null);
 
-      trackRef.current.style.setProperty('--teach-scroll-distance', `${distance}px`);
-    };
+  // panel closing state (requested by clicking same pill or external triggers)
+  const [panelClosing, setPanelClosing] = useState(false);
 
-    updateDistance();
-    window.addEventListener('resize', updateDistance, { passive: true });
-    return () => window.removeEventListener('resize', updateDistance);
-  }, []);
-
-  useEffect(() => {
-    const revealTargets = document.querySelectorAll('.card, .plan, .cert, .hero__stats div, .hex-block');
-
-    if (!('IntersectionObserver' in window)) return undefined;
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-    revealTargets.forEach((el, i) => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(28px)';
-      el.style.transition = `opacity 0.55s ease ${i * 0.06}s, transform 0.55s ease ${i * 0.06}s`;
-      observer.observe(el);
+  // toggle when clicking same pill: if same key, request closing animation; otherwise open new
+  const togglePill = (key) => {
+    setPanelClosing(false);
+    setSelectedPill((prev) => {
+      if (prev === key) {
+        // request close animation, parent will clear after timeout
+        setPanelClosing(true);
+        return prev; // keep selected until animation completes
+      }
+      return key;
     });
+  };
 
-    return () => observer.disconnect();
-  }, []);
-
+  // when a close is requested, clear selection after the animation duration
   useEffect(() => {
-    const handleScroll = () => setNavScrolled(window.scrollY > 10);
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    if (!panelClosing) return;
+    const t = setTimeout(() => {
+      setPanelClosing(false);
+      setSelectedPill(null);
+    }, 320);
+    return () => clearTimeout(t);
+  }, [panelClosing]);
 
   const scrollToPricing = () => {
-    document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const el = document.getElementById('pricing');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const selectedItem = selectedPill ? teachItems.find((item) => item.id === selectedPill.split('-')[1]) : null;
+  useEffect(() => {
+    const onScroll = () => setNavScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-  const togglePill = (key) => {
-    setSelectedPill((current) => current === key ? null : key);
-  };
+  // close the panel when clicking anywhere outside the panel or pills
+  // request the closing animation rather than instantly clearing selection
+  useEffect(() => {
+    const onPointerDown = (e) => {
+      const target = e.target;
+      if (!target) return;
+      // if clicking inside the detail panel or on a pill, do nothing
+      if (target.closest && (target.closest('.teach-detail-panel') || target.closest('.pill'))) return;
+      // if a panel is open, request the closing animation
+      if (selectedPill) {
+        setPanelClosing(true);
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [selectedPill]);
 
   return (
     <>
-      <FloatingBackground />
       <Header onEnroll={scrollToPricing} scrolled={navScrolled} />
-      <TeachDetailsPanel selectedItem={selectedItem} clearSelection={() => setSelectedPill(null)} />
 
       <main>
         <Hero onEnroll={scrollToPricing} />
+
         <TeachCarousel
           selectedPill={selectedPill}
           setSelectedPill={togglePill}
           trackRef={trackRef}
           firstSetRefs={firstSetRefs}
         />
+
+        <TeachDetailsPanel selectedItem={selectedItem} clearSelection={clearSelection} externalClosing={panelClosing} />
+
         <Projects />
         <Certificate />
+
         <Pricing onEnroll={scrollToPricing} />
       </main>
 
@@ -261,12 +267,26 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
   );
 }
 
-function TeachDetailsPanel({ selectedItem, clearSelection }) {
+
+// (TeachCarouselWrapper removed)
+
+function TeachDetailsPanel({ selectedItem, clearSelection, externalClosing }) {
+  const [isClosing, setIsClosing] = useState(false);
   if (!selectedItem) return null;
+
+  const handleClose = () => {
+    // play closing animation then call clearSelection
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      clearSelection();
+    }, 320);
+  };
 
   return (
     <aside
-      className="teach-detail-panel"
+      key={selectedItem.id}
+      className={`teach-detail-panel ${(isClosing || externalClosing) ? 'closing' : ''}`}
       aria-live="polite"
       style={{
         position: 'fixed',
@@ -290,7 +310,7 @@ function TeachDetailsPanel({ selectedItem, clearSelection }) {
         </div>
       </div>
       <p className="teach-detail-panel__description">{selectedItem.description}</p>
-      <button type="button" className="teach-detail-panel__close" onClick={clearSelection}>
+      <button type="button" className="teach-detail-panel__close" onClick={handleClose}>
         Close
       </button>
     </aside>
