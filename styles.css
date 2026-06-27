@@ -973,18 +973,23 @@ section:not(.hero) {
 
 .teach-carousel__track {
   --teach-scroll-distance: 1092px;
+  --teach-scroll-duration: 32s;
   display: flex;
   align-items: center;
   gap: 16px;
   width: max-content;
   margin: 0;
   padding: 16px 0;
-  animation: teach-strip-scroll 32s linear infinite;
+  animation: teach-strip-scroll var(--teach-scroll-duration) linear infinite;
   will-change: transform;
 }
 
 .teach-carousel__track.is-paused {
   animation-play-state: paused;
+}
+
+.teach-carousel__track.is-wheel-boosting {
+  --teach-scroll-duration: 10s;
 }
 
 @keyframes teach-strip-scroll {

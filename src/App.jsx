@@ -74,6 +74,9 @@ function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // enable faster wheel scrolling over the teach track
+  useTeachWheel(trackRef);
+
   // close the panel when clicking anywhere outside the panel or pills
   // request the closing animation rather than instantly clearing selection
   useEffect(() => {
@@ -267,8 +270,46 @@ function TeachCarousel({ selectedPill, setSelectedPill, trackRef, firstSetRefs }
   );
 }
 
+// make wheel scrolling over the track push the strip forward faster
+function useTeachWheel(trackRef) {
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
 
-// (TeachCarouselWrapper removed)
+    let boostTimer = null;
+
+    const onWheel = (e) => {
+      e.preventDefault();
+
+      const primaryDelta = Math.abs(e.deltaY || e.deltaX);
+      const modeMultiplier = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
+      const nudgeMs = Math.min(1800, Math.max(180, primaryDelta * modeMultiplier * 2));
+
+      el.classList.add('is-wheel-boosting');
+
+      try {
+        el.getAnimations().forEach((animation) => {
+          if (typeof animation.currentTime === 'number') {
+            animation.currentTime += nudgeMs;
+          }
+        });
+      } catch (err) {
+        // The normal CSS animation still runs if the animation API is unavailable.
+      }
+
+      clearTimeout(boostTimer);
+      boostTimer = setTimeout(() => {
+        el.classList.remove('is-wheel-boosting');
+      }, 600);
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      clearTimeout(boostTimer);
+    };
+  }, [trackRef]);
+}
 
 function TeachDetailsPanel({ selectedItem, clearSelection, externalClosing }) {
   const [isClosing, setIsClosing] = useState(false);
