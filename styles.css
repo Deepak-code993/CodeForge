@@ -973,7 +973,7 @@ section:not(.hero) {
 
 .teach-carousel__track {
   --teach-scroll-distance: 1092px;
-  --teach-scroll-duration: 10s;
+  --teach-scroll-duration: 9s;
   display: flex;
   align-items: center;
   gap: 16px;
