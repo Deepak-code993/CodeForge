@@ -375,8 +375,8 @@ function TeachDetailsPanel({ selectedItem, clearSelection, externalClosing }) {
         width: 'clamp(320px, 33.333vw, 460px)',
         height: '100vh',
         zIndex: 99999,
-        background: 'rgba(255, 255, 255, 0.62)',
-        backdropFilter: 'blur(28px)'
+        background: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(12px)'
       }}
     >
       <div className="teach-detail-panel__header">
